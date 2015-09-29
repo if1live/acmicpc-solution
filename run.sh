@@ -25,11 +25,18 @@ function run_problem_core {
 		echo "Problem #$problem [$extension]"
 	fi
 
-	# pre condition
+	# pre condition : compile
 	if [ $extension = "cpp" ]; then
 		clang++ $source
 	elif [ $extension = "c" ]; then
 		clang $source
+	elif [ $extension = "go" ]; then
+		go build $source
+	fi
+
+	if [ $? != 0 ]; then
+		printf "Compile Fail!\n"
+		exit -1
 	fi
 
 	for input in $(ls $problem/input*); do
@@ -37,10 +44,13 @@ function run_problem_core {
 		if [ $? != 0 ]; then success=false; fi
 	done
 
-	# post condition
+	# post condition : delete compiled result
 	if [ $extension = "cpp" ] || [ $extension = "c" ]; then
 		rm -rf $problem/a.out
 		rm -rf a.out
+	elif [ $extension = "go" ]; then
+		rm -rf $problem/main
+		rm -rf main
 	fi
 
 	if [ $use_diff = true ]; then
@@ -67,6 +77,8 @@ function run_single_test_case {
 		command="python3"
 	elif [ $extension = "rb" ]; then
 		command="ruby"
+	elif [ $extension = "go" ]; then
+		command="./main"
 	else
 		echo "Unknown extension : $extension"
 		exit -1
