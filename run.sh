@@ -17,7 +17,12 @@ function run_problem {
 }
 
 function run_problem_core {
-	source=$(ls $problem/main.*)
+	source=$(ls $problem/main.* 2> /dev/null)
+	if [ $? != 0 ]; then
+		printf "Problem #$problem's main source not exist\n"
+		exit -1
+	fi
+
 	extension=$(ls $problem/main.* | cut -d. -f2)
 	success=true
 
@@ -27,7 +32,7 @@ function run_problem_core {
 
 	# pre condition : compile
 	if [ $extension = "cpp" ]; then
-		clang++ $source
+		clang++ -std=c++11 $source
 	elif [ $extension = "c" ]; then
 		clang $source
 	elif [ $extension = "go" ]; then
@@ -99,11 +104,21 @@ function run_single_test_case {
 	fi
 }
 
+function show_source {
+	source=$(ls $problem/main.* 2> /dev/null)
+	if [ $? != 0 ]; then
+		printf "Problem #$problem's main source not exist\n"
+		exit -1
+	fi
+	cat $source
+}
+
 if [ "$#" -ne 2 ]; then
 	echo "Commands"
 	echo "$0 test all"
 	echo "$0 test 1000"
 	echo "$0 run 1000"
+	echo "$0 show 1000"
 	exit -1
 fi
 
@@ -117,4 +132,6 @@ if [ $1 = "test" ]; then
 	fi
 elif [ $1 = "run" ]; then
 	run_problem
+elif [ $1 = "show" ]; then
+	show_source
 fi

@@ -4,7 +4,7 @@
 
 class Loop {
 public:
-	Loop() { }
+	Loop() { initialize(); }
 	Loop(const Loop& o) { initialize(); }
 
 	void initialize() {
