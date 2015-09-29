@@ -63,6 +63,8 @@ function run_single_test_case {
 		scm $source < $input | tee $actual
 	elif [ $extension = "cpp" ] || [ $extension = "c" ]; then
 		./a.out < $input | tee $actual
+	elif [ $extension = "py" ]; then
+		python3 $source < $input | tee $actual
 	fi
 
 	if [ $use_diff = true ]; then
