@@ -4,7 +4,9 @@ My solution for Baekjoon Online Judge (acmicpc.net)
 
 ## How to run?
 ```
-sudo apt-get install scm racket colordiff
+sudo apt-get install colordiff
+sudo apt-get install scm racket
+sudo apt-get install clang
 ```
 
 ### Test all problems
@@ -17,13 +19,8 @@ sudo apt-get install scm racket colordiff
 ./run.sh test 1000
 ```
 
-### Run all problems
-```
-./run.sh run_racket all
-```
-
 ### Run specific problem
 ```
-./run.sh run_scm 1000
+./run.sh run 1000
 ```
 
