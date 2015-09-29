@@ -27,6 +27,8 @@ function run_problem_core {
 
 	# pre condition
 	if [ $extension = "cpp" ]; then
+		clang++ $source
+	elif [ $extension = "c" ]; then
 		clang $source
 	fi
 
@@ -34,6 +36,12 @@ function run_problem_core {
 		run_single_test_case
 		if [ $? != 0 ]; then success=false; fi
 	done
+
+	# post condition
+	if [ $extension = "cpp" ] || [ $extension = "c" ]; then
+		rm -rf $problem/a.out
+		rm -rf a.out
+	fi
 
 	if [ $use_diff = true ]; then
 		if [ $success = true ]; then
@@ -53,7 +61,7 @@ function run_single_test_case {
 
 	if [ $extension = "rkt" ] || [ $extension = "scm" ]; then
 		scm $source < $input | tee $actual
-	elif [ $extension = "cpp" ]; then
+	elif [ $extension = "cpp" ] || [ $extension = "c" ]; then
 		./a.out < $input | tee $actual
 	fi
 
