@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function test_all {
-	for problem in $(ls | grep "[[:digit:]]"); do
+	for problem in $(ls | grep "[[:digit:]]" | sort); do
 		test_problem
 	done
 }
@@ -60,12 +60,18 @@ function run_single_test_case {
 	success=true
 
 	if [ $extension = "rkt" ] || [ $extension = "scm" ]; then
-		scm $source < $input | tee $actual
+		command="scm"
 	elif [ $extension = "cpp" ] || [ $extension = "c" ]; then
-		./a.out < $input | tee $actual
+		command="./a.out"
 	elif [ $extension = "py" ]; then
-		python3 $source < $input | tee $actual
+		command="python3"
+	elif [ $extension = "rb" ]; then
+		command="ruby"
+	else
+		echo "Unknown extension : $extension"
+		exit -1
 	fi
+	eval "$command $source < $input | tee $actual"
 
 	if [ $use_diff = true ]; then
 		colordiff -w $expected $actual
