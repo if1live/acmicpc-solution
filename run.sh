@@ -45,10 +45,21 @@ function run_problem_core {
 		exit -1
 	fi
 
-	for input in $(ls $problem/input*); do
-		run_single_test_case
-		if [ $? != 0 ]; then success=false; fi
-	done
+	ls $problem/input* 1> /dev/null 2> /dev/null
+	if [ $? = 0 ]; then
+		input_exist=true
+	else
+		input_exist=false
+	fi
+
+	if [ $input_exist = true ]; then
+		for input in $(ls $problem/input*); do
+			run_single_test_case
+			if [ $? != 0 ]; then success=false; fi
+		done
+	else
+		simple_run
+	fi
 
 	# post condition : delete compiled result
 	if [ $extension = "cpp" ] || [ $extension = "c" ]; then
@@ -59,7 +70,7 @@ function run_problem_core {
 		rm -rf main
 	fi
 
-	if [ $use_diff = true ]; then
+	if [ $use_diff = true ] && [ $input_exist = true ]; then
 		if [ $success = true ]; then
 			printf "\nSolved!\n\n"
 		else
@@ -68,27 +79,36 @@ function run_problem_core {
 	fi
 }
 
+function select_runner {
+	if [ $1 = "rkt" ] || [ $1 = "scm" ]; then
+		runner="scm"
+	elif [ $1 = "cpp" ] || [ $1 = "c" ]; then
+		runner="./a.out"
+	elif [ $1 = "py" ]; then
+		runner="python3"
+	elif [ $1 = "rb" ]; then
+		runner="ruby"
+	elif [ $1 = "go" ]; then
+		runner="./main"
+	else
+		echo "Unknown extension : $extension"
+		exit -1
+	fi
+}
+
+function simple_run {
+	select_runner $extension
+	eval "time $runner"
+	return 0
+}
+
 function run_single_test_case {
 	# input-abc.txt -> abc
 	num=$(echo $input | cut -d. -f1 | cut -d- -f2)
 	expected="$problem/expected-$num.txt"
 	actual="actual.txt"
 	success=true
-
-	if [ $extension = "rkt" ] || [ $extension = "scm" ]; then
-		runner="scm"
-	elif [ $extension = "cpp" ] || [ $extension = "c" ]; then
-		runner="./a.out"
-	elif [ $extension = "py" ]; then
-		runner="python3"
-	elif [ $extension = "rb" ]; then
-		runner="ruby"
-	elif [ $extension = "go" ]; then
-		runner="./main"
-	else
-		echo "Unknown extension : $extension"
-		exit -1
-	fi
+	select_runner $extension
 	eval "$runner $source < $input | tee $actual"
 
 	if [ $use_diff = true ]; then
