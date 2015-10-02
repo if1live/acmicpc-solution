@@ -11,16 +11,16 @@ sudo apt-get install clang
 
 ### Test all problems
 ```
-./run.sh test all
+./run.sh test acmicpc
 ```
 
 ### Test specific problem
 ```
-./run.sh test 1000
+./run.sh test acmicpc/1000
 ```
 
 ### Run specific problem
 ```
-./run.sh run 1000
+./run.sh run acmicpc/1000
 ```
 

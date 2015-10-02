@@ -1,22 +1,23 @@
 #!/bin/bash
 
 function test_all {
-	for problem in $(ls | grep "[[:digit:]]" | sort); do
-		test_problem
+	for elem in $(ls $1 | sort); do
+		test_problem $1/$elem
 	done
 }
 
 function test_problem {
-	use_diff=true
-	run_problem_core
+	run_problem_core $1 true
 }
 
 function run_problem {
-	use_diff=false
-	run_problem_core
+	run_problem_core $1 false
 }
 
 function run_problem_core {
+	problem=$1
+	use_diff=$2
+
 	source=$(ls $problem/main.* 2> /dev/null)
 	if [ $? != 0 ]; then
 		printf "Problem #$problem's main source not exist\n"
@@ -75,20 +76,20 @@ function run_single_test_case {
 	success=true
 
 	if [ $extension = "rkt" ] || [ $extension = "scm" ]; then
-		command="scm"
+		runner="scm"
 	elif [ $extension = "cpp" ] || [ $extension = "c" ]; then
-		command="./a.out"
+		runner="./a.out"
 	elif [ $extension = "py" ]; then
-		command="python3"
+		runner="python3"
 	elif [ $extension = "rb" ]; then
-		command="ruby"
+		runner="ruby"
 	elif [ $extension = "go" ]; then
-		command="./main"
+		runner="./main"
 	else
 		echo "Unknown extension : $extension"
 		exit -1
 	fi
-	eval "$command $source < $input | tee $actual"
+	eval "$runner $source < $input | tee $actual"
 
 	if [ $use_diff = true ]; then
 		colordiff -w $expected $actual
@@ -105,7 +106,7 @@ function run_single_test_case {
 }
 
 function show_source {
-	source=$(ls $problem/main.* 2> /dev/null)
+	source=$(ls $1/main.* 2> /dev/null)
 	if [ $? != 0 ]; then
 		printf "Problem #$problem's main source not exist\n"
 		exit -1
@@ -115,23 +116,40 @@ function show_source {
 
 if [ "$#" -ne 2 ]; then
 	echo "Commands"
-	echo "$0 test all"
-	echo "$0 test 1000"
-	echo "$0 run 1000"
-	echo "$0 show 1000"
+	echo "$0 test acmicpc"
+	echo "$0 test acmicpc/1000"
+	echo "$0 run acmicpc/1000"
+	echo "$0 show acmicpc/1000"
 	exit -1
 fi
 
+command=$1
 problem=$2
+echo $problem | grep "/" > /dev/null
+if [ $? = 0 ]; then
+	category=$(echo $problem | cut -d/ -f1)
+	problem_name=$(echo $problem | cut -d/ -f2)
+else
+	category=$(echo $problem | cut -d/ -f1)
+	problem_name=""
+fi
 
-if [ $1 = "test" ]; then
-	if [ $2 = "all" ]; then
-		test_all
+function display_args {
+    printf "Command: $command\n"
+    printf "Category: $category\n"
+    printf "Problem: $problem_name\n"
+    printf "\n"
+}
+#display_args
+
+if [ $command = "test" ]; then
+	if [ -z $problem_name ]; then
+		test_all $problem
 	else
-		test_problem
+		test_problem $problem
 	fi
-elif [ $1 = "run" ]; then
-	run_problem
-elif [ $1 = "show" ]; then
-	show_source
+elif [ $command = "run" ]; then
+	run_problem $problem
+elif [ $command = "show" ]; then
+	show_source $problem
 fi
