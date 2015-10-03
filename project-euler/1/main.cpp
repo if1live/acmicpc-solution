@@ -4,18 +4,23 @@
  */
 
 #include <cstdio>
+#include <cassert>
+
+const int MAX_RANGE = 1000;
 
 int main()
 {
-    const int MAX_RANGE = 1000;
-    int sum = 0;
-    for(int i = 0 ; i < MAX_RANGE ; ++i) {
-        bool is_mul_3 = (i % 3 == 0);
-        bool is_mul_5 = (i % 5 == 0);
-        if(is_mul_3 || is_mul_5) {
-            sum += i;
-        }
-    }
-    printf("%d\n", sum);
-    return 0;
+	// 10 => 3+6+9 = 3 * (1+2+3)
+	int count_3 = (MAX_RANGE - 1) / 3;
+	int count_5 = (MAX_RANGE - 1) / 5;
+	int count_15 = (MAX_RANGE - 1) / 15;
+
+	int sum = 0;
+	sum += 3 * count_3 * (count_3 + 1) / 2;
+	sum += 5 * count_5 * (count_5 + 1) / 2;
+	sum -= 15 * count_15 * (count_15 + 1) / 2;
+	printf("%d\n", sum);
+
+	assert(sum == 233168);
+	return 0;
 }
